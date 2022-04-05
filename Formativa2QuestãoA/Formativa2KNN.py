@@ -5,6 +5,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn import model_selection
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
 from sklearn.datasets import load_breast_cancer
+from sklearn.linear_model import LinearRegression   
 
 X, y = load_breast_cancer(return_X_y=True)
 

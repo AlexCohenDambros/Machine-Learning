@@ -1,8 +1,6 @@
-
-
 # Importa bibliotecas necessárias 
 import numpy as np
-from sklearn.neighbors import KNeighborsRegressor
+from sklearn.tree import DecisionTreeRegressor, plot_tree
 from sklearn import model_selection
 from sklearn.metrics import mean_absolute_error
 from sklearn.datasets import load_diabetes
@@ -23,11 +21,11 @@ print("Formato de y: ", y.shape)
 # Definição dos parâmetros a serem avaliados 
 
 parameters = [
-  {'n_neighbors': [1, 2, 3, 4, 5], 'weights': ['uniform', 'distance'], 'algorithm':['auto', 'ball_tree', 'kd_tree', 'brute'], 'p': [1,2]},
+  {'max_depth': [3, 5, 10, 20], 'min_samples_split': [3, 5, 10], 'criterion':['absolute_error', 'squared_error'], 'splitter':['best', 'random']},
   ]
 
 folds=5
-model = KNeighborsRegressor()
+model = DecisionTreeRegressor(random_state=42)
 
 # separando uma parte para base de validação (20%)
 X, X_val, y, y_val = train_test_split(X, y, train_size=0.8, random_state=42)
