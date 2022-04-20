@@ -15,18 +15,15 @@ Max_depth = range(1,10)
 min_sample_split = range(2,10)
 min_sample_leaf = range(1,10)
 splitter= ['best', 'random']
+valorArvoreDecisaoes = [Criterion, Max_depth, min_sample_split, min_sample_leaf, splitter]
+listaArvoreDecisao = itertools.product(*valorArvoreDecisaoes)
+melhorResultadoArvoreDecisao = 0
 
-valores = [Criterion, Max_depth, min_sample_split, min_sample_leaf, splitter]
-
-lista = itertools.product(*valores)
-
-melhorResultado = 0
-
-for valor in lista:
+for valorArvoreDecisao in listaArvoreDecisao:
 
     
     # Definindo a técnica a ser utilizada
-    clf = DecisionTreeClassifier(criterion=valor[0], max_depth=valor[1], min_samples_split=valor[2], min_samples_leaf=valor[3], splitter=valor[4], random_state=42)
+    clf = DecisionTreeClassifier(criterion=valorArvoreDecisao[0], max_depth=valorArvoreDecisao[1], min_samples_split=valorArvoreDecisao[2], min_samples_leaf=valorArvoreDecisao[3], splitter=valorArvoreDecisao[4], random_state=42)
 
     # Usando a validação cruzada com 10 folds neste exemplo.
     T=5 # número de pastas ou folds
@@ -34,7 +31,7 @@ for valor in lista:
 
     if result.mean() > melhorResultado:
     
-        print(valor)
+        print(valorArvoreDecisao)
         melhorResultado = result.mean()
 
         # Mostrando a acurácia média e desvio padrão.
