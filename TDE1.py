@@ -7,11 +7,14 @@ from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 from sklearn import model_selection
 
+
+# carrega a base
 X, y = load_digits(return_X_y=True)
 print("X: ", X.shape)
 print("y: ", y.shape)
 
 
+# separa teste e treino
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
 
 print("\nX_train: ", X_train.shape)
@@ -19,47 +22,57 @@ print("y_train: ", y_train.shape)
 print("X_test: ", X_test.shape)
 print("y_test: ", y_test.shape)
 
-n_neighbors = 3 # k
-score = 0
+n_neighbors = 3 # k = número de vizinhos
+score = 0 # número de acertos
 
+
+# Retorna o elemnto que mais se repete na lista 
 def returnElementMax(lista):
-    return max(set(lista), key=lista.count)
+    return max(set(lista), key=lista.count) # ordena contando os objetos
 
-def distancia(element, x):
-    dist = 0
+# distancia euclidiana 
+def distanciaEuclidiana(element, x):
+    distancia = 0
 
     for i in range(len(element)):
-        dist += (element[i] - x[i]) ** 2
+        distancia += (element[i] - x[i]) ** 2
 
-    return dist**0.5
+    return distancia**0.5
 
+# retorna o elemento mais proximo da base atual
 def returnElementoProximo(element, x_train, y_train, verificador):
     
-    min_distance = float('inf')
-    class_most_close = 0
-    index_elemento_proximo = 0 
-
+    distancia_menor = float('inf') # guarda a menor distancia
+    class_xtrain = 0 # guarda a classe do elemento do x_train
+    index_elemento_proximo = 0 # guarda o index do elemento mais proximo
+ 
     for i in range(x_train.shape[0]):
-        current_distance = distancia(element, x_train[i])
+        distancia_Atual = distanciaEuclidiana(element, x_train[i]) # calcula a distancia atual entre o elemento e o elemento do X_train
 
-        if current_distance < min_distance and verificador[i]:
-            min_distance = current_distance
-            class_most_close = y_train[i]
+        if distancia_Atual < distancia_menor and verificador[i]: 
+            distancia_menor = distancia_Atual
+            class_xtrain = y_train[i] 
             index_elemento_proximo = i
     
-    verificador[index_elemento_proximo] = False
-    return class_most_close, verificador
+    verificador[index_elemento_proximo] = False # retorna como falso para não retornar o mesmo elemento 
+    
+    # retorna o elemento do x_train que mais se parece com o elemento passado como parametro
+    return class_xtrain, verificador
 
 
+
+# para cada elemento do X_test vamos comparar com todos os elementos da base de treino
 for i in range(X_test.shape[0]):
+    
+    lista = [0]* n_neighbors # armazena todas as interações dos n_neighbors
+    verificador = [True] * len(y_train) # array para verificar e nao pegar sempre o mesmo elemento 
 
-    lista = [0]* n_neighbors
-    verificador = [True] * len(y_train)
-
+    # percorre a base de treino 3x e cada vez que percorrer vai pegar o elemento mais proximo do X_test atual
     for j in range(n_neighbors):
         lista[j], verificador = returnElementoProximo(X_test[i], X_train, y_train, verificador)
     
     
+    # se o elemento atual for igual o elemento do y_test, soma mais um nos acertos
     if returnElementMax(lista) == y_test[i]:
         score+=1
     
