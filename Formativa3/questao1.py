@@ -116,7 +116,7 @@ def knn(T, parameters):
     print("Probabilidade de cada classe para a primeira instância: ", predicted_proba[0])
 
     # Calculando a matriz de confusão
-    print("Matriz de Confusão:")
+    print("Matriz de Confusão:") 
     matrix = confusion_matrix(y, y_pred)
     print(matrix)
 
