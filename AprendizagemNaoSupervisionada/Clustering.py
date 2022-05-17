@@ -24,7 +24,7 @@ database = pd.read_csv("AprendizagemNaoSupervisionada\s1.csv")
 
 X =  database.to_numpy()
 
-range_n_clusters = [2, 3, 4, 5, 6, 8, 10, 15]
+range_n_clusters = [2, 3, 4, 5, 6, 8, 10, 15, 20, 25]
 dt_iner = []
 for n_clusters in range_n_clusters:
     # Create a subplot with 1 row and 2 columns
