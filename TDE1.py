@@ -32,7 +32,7 @@ def returnElementMax(lista):
 
 # distancia euclidiana 
 def distanciaEuclidiana(element, x):
-    distancia = 0
+    distancia = 01
 
     for i in range(len(element)):
         distancia += (element[i] - x[i]) ** 2
