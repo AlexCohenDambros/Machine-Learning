@@ -30,7 +30,7 @@ print("y_train: ", y_train.shape)
 print("X_test: ", X_val.shape)
 print("y_test: ", y_val.shape)
 
-# Parametros da função KNN
+# Parametros da função SVM
 parameters1 = [
    {'C': [1,5,10,100,200], 'kernel': ['linear'], 
     'C': [1,5,10,50,100,200], 'kernel': ['poly'],
@@ -95,6 +95,6 @@ def svc(T, parameters_here):
 # Treinando o classificador
 T = 10 # Número de folds
 
-print("\n==== Função SVC ====")
+print("\n==== Função SVM ====")
 
 svc(T, parameters1)
