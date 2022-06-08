@@ -3,9 +3,11 @@
 import cv2
 import re
 import math
+from matplotlib.pyplot import cla
 from skimage import feature
 from skimage.feature import hog
 import os
+import os.path
 
 # Example: how to load the csv files (features and labels)
 import pandas as pd
@@ -55,31 +57,41 @@ file_list.append(os.listdir(r"Base/montanhas"))
 file_list.append(os.listdir(r"Base/comida"))
 
 # general path
-#path='/content/drive/My Drive/Base1/'
 path = 'Base/'
 
 # list of classes
 class_names = ['humanos', 'praia', 'obras', 'onibus', 'dino',
                'elefante', 'flores', 'cavalos', 'montanhas', 'comida']
-#class_names=['dogs', 'cats']
 
-X_deep = []
-y = []
+
+file_exists_X_deep = os.path.exists('X_deep.csv')
+file_exists_y = os.path.exists('y.csv')
+
+if file_exists_X_deep and file_exists_y:
+    X_deep = pd.read_csv('X_deep.csv')
+    y = pd.read_csv('y.csv')
+
+    X_deep = X_deep.fillna(0)
+    y = y.fillna(0)
+
+else:
+    X_deep = []
+    y = []
 
 # ======== Parametros das funcoes de Machine Learning ========
 
 parametrosKNN = [
-    {'n_neighbors': list(range(0, 30)),
+    {'n_neighbors': list(range(1, 10, 1)),
      'weights': ['uniform', 'distance'],
      'algorithm':['auto', 'ball_tree', 'kd_tree', 'brute'],
      'p': [1, 2],
-     'leaf_size': list(range(5, 60, 5))},
+     'leaf_size': list(range(2, 20, 2))},
 ]
 
 parametrosDecisionTrees = [
     {'max_depth': list(range(3, 60, 3)),
-     'min_samples_split': list(range(0, 21, 3)),
-     'criterion': ['entropy', 'gini', 'log_loss'],
+     'min_samples_split': list(range(5, 25, 5)),
+     'criterion': ['entropy', 'gini'],
      'splitter':['best', 'random']},
 ]
 
@@ -97,20 +109,17 @@ parametersSVM = [
 ]
 
 parametersRandomForest = [
-    {'n_estimator': list(range(0, 200, 20)),
-     'max_depth': list(range(0, 20, 2))
-     'criterion': ['gini', 'entropy', 'log_loss'],
-     'min_samples_split': list(range(0, 10, 1)),
-     'min_samples_leaf': list(range(0, 10, 1)),
-     'max_samples': list(range(0, 100, 5)),
-     'max_features': ['sqrt', 'log2', None]
-     }
+    {'n_estimators': list(range(10, 190, 20)),
+     'max_depth': list(range(3, 30, 3)),
+     'min_samples_split': list(range(5, 25, 5)),
+     'criterion': ['gini', 'entropy']
+    }
 ]
 
 
 parametersBaggind = [
-    {'n_estimator': list(range(0, 100, 10)),
-     'max_samples': list(range(0, 100, 2))
+    {'n_estimators': list(range(10, 100, 10)),
+     'max_samples': list(range(2, 20, 2)),
      'bootstrap': [True, False],
      'bootstrap_features': [True, False],
      'base_estimator': [None, DecisionTreeClassifier(criterion='entropy', max_depth=5), DecisionTreeClassifier(criterion='entropy', max_depth=7), KNeighborsClassifier(n_neighbors=3), KNeighborsClassifier(n_neighbors=3, weights='distance')]
@@ -118,38 +127,38 @@ parametersBaggind = [
 ]
 
 
-# Feature extraction
-for classes_files, classe in zip(file_list, range(10)):
-    for i in range(100):
-        name = str(path) + str(class_names[classe]
-                               ) + str('/') + str(classes_files[i])
-        print(name)
-        y.append(classe)
+# # Feature extraction
+# for classes_files, classe in zip(file_list, range(10)):
+#     for i in range(100):
+#         name = str(path) + str(class_names[classe]
+#                                ) + str('/') + str(classes_files[i])
+#         print(name)
+#         y.append(classe)
 
-# Extract deep features using InceptionV3 pretrained model
-        imagem = cv2.imread(name)
-        img = cv2.resize(imagem, (299, 299))
-        xd = image.img_to_array(img)
-        xd = np.expand_dims(xd, axis=0)
-        xd = preprocess_input(xd)
-        deep_features = model.predict(xd)
-        print(deep_features.shape)
+# # Extract deep features using InceptionV3 pretrained model
+#         imagem = cv2.imread(name)
+#         img = cv2.resize(imagem, (299, 299))
+#         xd = image.img_to_array(img)
+#         xd = np.expand_dims(xd, axis=0)
+#         xd = preprocess_input(xd)
+#         deep_features = model.predict(xd)
+#         print(deep_features.shape)
 
-        X_image_aux = []
-        for aux in deep_features:
-            X_image_aux = np.append(X_image_aux, np.ravel(aux))
+#         X_image_aux = []
+#         for aux in deep_features:
+#             X_image_aux = np.append(X_image_aux, np.ravel(aux))
 
-        deep_features = [i for i in X_image_aux]
+#         deep_features = [i for i in X_image_aux]
 
-        X_deep.append(deep_features)
+#         X_deep.append(deep_features)
 
-# Saving the extracted features (deep) in a csv file
-df = pd.DataFrame(X_deep)
-df.to_csv('X_deep.csv', header=False, index=False)
+# # Saving the extracted features (deep) in a csv file
+# df = pd.DataFrame(X_deep)
+# df.to_csv('X_deep.csv', header=False, index=False)
 
-# Saving the classes in a csv file
-df_class = pd.DataFrame(y)
-df_class.to_csv('y.csv', header=False, index=False)
+# # Saving the classes in a csv file
+# df_class = pd.DataFrame(y)
+# df_class.to_csv('y.csv', header=False, index=False)
 
 
 # ===================================================================================
@@ -175,6 +184,14 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=.4, random_state=42, stratify=y)
 
 
+def plotResultados(score, matrix):
+
+    # apresenta os resultados
+    print("Accuracy = %.2f " % score)
+    print("Confusion Matrix:")
+    print(matrix)
+
+
 def kNN(parameters):
 
     # Treina o classificador
@@ -184,6 +201,9 @@ def kNN(parameters):
 
     clfa = clfa.fit(X_train, y_train)
 
+    best_parameters = clfa.best_params_
+    print(best_parameters)
+
     # testa usando a base de testes
     predicted = clfa.predict(X_test)
     predp = clfa.predict_proba(X_test)
@@ -191,15 +211,12 @@ def kNN(parameters):
     # calcula a acurÃ¡cia na base de teste
     score = clfa.score(X_test, y_test)
 
-    # calcula a matriz de confusÃ£o
+    # calcula a matriz de confusao
     matrix = confusion_matrix(y_test, predicted)
 
-    # apresenta os resultados
-    print("Accuracy = %.2f " % score)
-    print("Confusion Matrix:")
-    print(matrix)
+    print("\nConcluido!")
 
-    return predicted, score
+    return predicted, predp, score, matrix, best_parameters
 
 
 def decisionTrees(parameters):
@@ -211,6 +228,8 @@ def decisionTrees(parameters):
 
     clfa = clfa.fit(X_train, y_train)
 
+    best_parameters = clfa.best_params_
+
     # testa usando a base de testes
     predicted = clfa.predict(X_test)
     predp = clfa.predict_proba(X_test)
@@ -221,12 +240,9 @@ def decisionTrees(parameters):
     # calcula a matriz de confusÃ£o
     matrix = confusion_matrix(y_test, predicted)
 
-    # apresenta os resultados
-    print("Accuracy = %.2f " % score)
-    print("Confusion Matrix:")
-    print(matrix)
+    print("\nConcluido!")
 
-    return predicted, score
+    return predicted, predp, score, matrix, best_parameters
 
 
 def sVM(parameters):
@@ -238,22 +254,21 @@ def sVM(parameters):
 
     clfa = clfa.fit(X_train, y_train)
 
+    best_parameters = clfa.best_params_
+
     # testa usando a base de testes
     predicted = clfa.predict(X_test)
     predp = clfa.predict_proba(X_test)
 
-    # calcula a acurÃ¡cia na base de teste
+    # calcula a acuracia na base de teste
     score = clfa.score(X_test, y_test)
 
-    # calcula a matriz de confusÃ£o
+    # calcula a matriz de confusao
     matrix = confusion_matrix(y_test, predicted)
 
-    # apresenta os resultados
-    print("Accuracy = %.2f " % score)
-    print("Confusion Matrix:")
-    print(matrix)
+    print("\nConcluido!")
 
-    return predicted, score
+    return predicted, predp, score, matrix, best_parameters
 
 
 def naiveBayes(parameters):
@@ -265,6 +280,8 @@ def naiveBayes(parameters):
 
     clfa = clfa.fit(X_train, y_train)
 
+    best_parameters = clfa.best_params_
+
     # testa usando a base de testes
     predicted = clfa.predict(X_test)
     predp = clfa.predict_proba(X_test)
@@ -275,12 +292,9 @@ def naiveBayes(parameters):
     # calcula a matriz de confusÃ£o
     matrix = confusion_matrix(y_test, predicted)
 
-    # apresenta os resultados
-    print("Accuracy = %.2f " % score)
-    print("Confusion Matrix:")
-    print(matrix)
+    print("\nConcluido!")
 
-    return predicted, score
+    return predicted, predp, score, matrix, best_parameters
 
 
 def randomForest(parameters):
@@ -292,6 +306,8 @@ def randomForest(parameters):
 
     clfa = clfa.fit(X_train, y_train)
 
+    best_parameters = clfa.best_params_
+
     # testa usando a base de testes
     predicted = clfa.predict(X_test)
     predp = clfa.predict_proba(X_test)
@@ -302,12 +318,9 @@ def randomForest(parameters):
     # calcula a matriz de confusÃ£o
     matrix = confusion_matrix(y_test, predicted)
 
-    # apresenta os resultados
-    print("Accuracy = %.2f " % score)
-    print("Confusion Matrix:")
-    print(matrix)
+    print("\nConcluido!")
 
-    return predicted, score
+    return predicted, predp, score, matrix, best_parameters
 
 
 def bagging(parameters):
@@ -317,9 +330,8 @@ def bagging(parameters):
     clfa = GridSearchCV(clfa, parameters, scoring='r2', n_jobs=5)
 
     clfa = clfa.fit(X_train, y_train)
-    
+
     best_parameters = clfa.best_params_
-    
 
     # testa usando a base de testes
     predicted = clfa.predict(X_test)
@@ -331,40 +343,60 @@ def bagging(parameters):
     # calcula a matriz de confusÃ£o
     matrix = confusion_matrix(y_test, predicted)
 
-    # apresenta os resultados
-    print("Accuracy = %.2f " % score)
-    print("Confusion Matrix:")
-    print(matrix)
+    print("\nConcluido!")
 
-    return predicted, score
+    return predicted, predp, score, matrix, best_parameters
 
+melhoresResultados = {}
 
-bestValues = []
+print("\n==== Executando --> KNN ====")
+predicted, predp, score, matrix, best_parameters = kNN(parametrosKNN)
+melhoresResultados["KNN"] = [predicted, predp, score, matrix, best_parameters]
 
+print("\n==== Executando --> Arvore de Decisao ====")
+predicted, predp, score, matrix, best_parameters = decisionTrees(parametrosDecisionTrees)
+melhoresResultados["DecisionTrees"] = [predicted, predp, score, matrix, best_parameters]
 
-print("\n==== Função KNN ====")
-predicted, score = kNN(parametrosKNN)
+print("\n==== Executando --> SVM ====")
+predicted, predp, score, matrix, best_parameters = sVM(parametersSVM)
+melhoresResultados["SVM"] = [predicted, predp, score, matrix, best_parameters]
 
-print("\n==== Função NaiveBayes ====")
-predicted, score = naiveBayes(parametrosNaiveBayes)
+print("\n==== Executando --> Naive Bayes ====")
+predicted, predp, score, matrix, best_parameters = naiveBayes(parametrosNaiveBayes)
+melhoresResultados["NaiveBayes"] = [predicted, predp, score, matrix, best_parameters]
+
+print("\n==== Executando --> Random Forest ====")
+predicted, predp, score, matrix, best_parameters = randomForest(
+    parametersRandomForest)
+melhoresResultados["RandomForest"] = [
+    predicted, predp, score, matrix, best_parameters]
+
+print("\n==== Executando --> Bagging ====")
+predicted, predp, score, matrix, best_parameters = bagging(parametersBaggind)
+melhoresResultados["Bagging"] = [
+    predicted, predp, score, matrix, best_parameters]
+
+for key in melhoresResultados:
+    print("Classification accuracy {}: {}".format(
+        key, melhoresResultados[key][2]))
 
 # ===================================================================================
 
 # Plot mistakes (images)
-print(predicted.shape)
-for i in range(len(predicted)):
-    if (predicted[i] != y_test[i]):
-        dist = 1
-        j = 0
-        while (j < len(X) and dist != 0):
-            dist = np.linalg.norm(X[j]-X_test[i])
-            j += 1
-        print("Label:", y[j-1], class_names[y[j-1]], "  /  Prediction: ",
-              predicted[i], class_names[predicted[i]], predp[i][predicted[i]])
-        name = path + \
-            str(class_names[y[j-1]]) + "/" + str(j) + ".jpg"
-        print(name)
-        im = cv2.imread(name)
-        cv2.imshow("TDE2", im)
-        print(
-            "=============================================================================")
+
+# print(predicted.shape)
+# for i in range(len(predicted)):
+#     if (predicted[i] != y_test[i]):
+#         dist = 1
+#         j = 0
+#         while (j < len(X) and dist != 0):
+#            dist = np.linalg.norm(X[j]-X_test[i])
+#            j += 1
+#        print("Label:", y[j-1], class_names[y[j-1]], "  /  Prediction: ",
+#              predicted[i], class_names[predicted[i]], predp[i][predicted[i]])
+#         name = path + \
+#            str(class_names[y[j-1]]) + "/" + str(j) + ".jpg"
+#         print(name)
+#         im = cv2.imread(name)
+#         cv2.imshow("TDE2", im)
+#        print("=============================================================================")
