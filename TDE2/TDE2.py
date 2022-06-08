@@ -26,7 +26,6 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import BaggingClassifier
 
-
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.inception_v3 import InceptionV3, preprocess_input
 from tensorflow.keras.applications.xception import Xception
@@ -62,7 +61,6 @@ path = 'Base/'
 # list of classes
 class_names = ['humanos', 'praia', 'obras', 'onibus', 'dino',
                'elefante', 'flores', 'cavalos', 'montanhas', 'comida']
-
 
 file_exists_X_deep = os.path.exists('X_deep.csv')
 file_exists_y = os.path.exists('y.csv')
@@ -113,13 +111,12 @@ parametersRandomForest = [
      'max_depth': list(range(3, 30, 3)),
      'min_samples_split': list(range(5, 25, 5)),
      'criterion': ['gini', 'entropy']
-    }
+     }
 ]
 
 
 parametersBaggind = [
-    {'n_estimators': list(range(10, 100, 10)),
-     'max_samples': list(range(2, 20, 2)),
+    {'n_estimators': list(range(10, 190, 20)),
      'bootstrap': [True, False],
      'bootstrap_features': [True, False],
      'base_estimator': [None, DecisionTreeClassifier(criterion='entropy', max_depth=5), DecisionTreeClassifier(criterion='entropy', max_depth=7), KNeighborsClassifier(n_neighbors=3), KNeighborsClassifier(n_neighbors=3, weights='distance')]
@@ -127,39 +124,40 @@ parametersBaggind = [
 ]
 
 
-# # Feature extraction
-# for classes_files, classe in zip(file_list, range(10)):
-#     for i in range(100):
-#         name = str(path) + str(class_names[classe]
-#                                ) + str('/') + str(classes_files[i])
-#         print(name)
-#         y.append(classe)
+# Feature extraction
 
-# # Extract deep features using InceptionV3 pretrained model
-#         imagem = cv2.imread(name)
-#         img = cv2.resize(imagem, (299, 299))
-#         xd = image.img_to_array(img)
-#         xd = np.expand_dims(xd, axis=0)
-#         xd = preprocess_input(xd)
-#         deep_features = model.predict(xd)
-#         print(deep_features.shape)
+def processing_Images():
+    for classes_files, classe in zip(file_list, range(10)):
+        for i in range(100):
+            name = str(path) + str(class_names[classe]
+                                   ) + str('/') + str(classes_files[i])
+            print(name)
+            y.append(classe)
 
-#         X_image_aux = []
-#         for aux in deep_features:
-#             X_image_aux = np.append(X_image_aux, np.ravel(aux))
+    # Extract deep features using InceptionV3 pretrained model
+            imagem = cv2.imread(name)
+            img = cv2.resize(imagem, (299, 299))
+            xd = image.img_to_array(img)
+            xd = np.expand_dims(xd, axis=0)
+            xd = preprocess_input(xd)
+            deep_features = model.predict(xd)
+            print(deep_features.shape)
 
-#         deep_features = [i for i in X_image_aux]
+            X_image_aux = []
+            for aux in deep_features:
+                X_image_aux = np.append(X_image_aux, np.ravel(aux))
 
-#         X_deep.append(deep_features)
+            deep_features = [i for i in X_image_aux]
 
-# # Saving the extracted features (deep) in a csv file
-# df = pd.DataFrame(X_deep)
-# df.to_csv('X_deep.csv', header=False, index=False)
+            X_deep.append(deep_features)
 
-# # Saving the classes in a csv file
-# df_class = pd.DataFrame(y)
-# df_class.to_csv('y.csv', header=False, index=False)
+    # Saving the extracted features (deep) in a csv file
+    df = pd.DataFrame(X_deep)
+    df.to_csv('X_deep.csv', header=False, index=False)
 
+    # Saving the classes in a csv file
+    df_class = pd.DataFrame(y)
+    df_class.to_csv('y.csv', header=False, index=False)
 
 # ===================================================================================
 
@@ -202,7 +200,6 @@ def kNN(parameters):
     clfa = clfa.fit(X_train, y_train)
 
     best_parameters = clfa.best_params_
-    print(best_parameters)
 
     # testa usando a base de testes
     predicted = clfa.predict(X_test)
@@ -234,10 +231,10 @@ def decisionTrees(parameters):
     predicted = clfa.predict(X_test)
     predp = clfa.predict_proba(X_test)
 
-    # calcula a acurÃ¡cia na base de teste
+    # calcula a aacuracia na base de teste
     score = clfa.score(X_test, y_test)
 
-    # calcula a matriz de confusÃ£o
+    # calcula a matriz de confusao
     matrix = confusion_matrix(y_test, predicted)
 
     print("\nConcluido!")
@@ -289,7 +286,7 @@ def naiveBayes(parameters):
     # calcula a acurÃ¡cia na base de teste
     score = clfa.score(X_test, y_test)
 
-    # calcula a matriz de confusÃ£o
+    # calcula a matriz de confusao
     matrix = confusion_matrix(y_test, predicted)
 
     print("\nConcluido!")
@@ -315,7 +312,7 @@ def randomForest(parameters):
     # calcula a acurÃ¡cia na base de teste
     score = clfa.score(X_test, y_test)
 
-    # calcula a matriz de confusÃ£o
+    # calcula a matriz de confusao
     matrix = confusion_matrix(y_test, predicted)
 
     print("\nConcluido!")
@@ -324,6 +321,7 @@ def randomForest(parameters):
 
 
 def bagging(parameters):
+
     # Treina o classificador
     clfa = BaggingClassifier(random_state=42)
 
@@ -340,63 +338,83 @@ def bagging(parameters):
     # calcula a acurÃ¡cia na base de teste
     score = clfa.score(X_test, y_test)
 
-    # calcula a matriz de confusÃ£o
+    # calcula a matriz de confusao
     matrix = confusion_matrix(y_test, predicted)
 
     print("\nConcluido!")
 
     return predicted, predp, score, matrix, best_parameters
 
-melhoresResultados = {}
 
-print("\n==== Executando --> KNN ====")
-predicted, predp, score, matrix, best_parameters = kNN(parametrosKNN)
-melhoresResultados["KNN"] = [predicted, predp, score, matrix, best_parameters]
+def processing_algorithms():
+    print("\n==== Executando --> KNN ====")
+    predicted, predp, score, matrix, best_parameters = kNN(parametrosKNN)
+    melhoresResultados["KNN"] = [predicted, predp, score, matrix, best_parameters]
 
-print("\n==== Executando --> Arvore de Decisao ====")
-predicted, predp, score, matrix, best_parameters = decisionTrees(parametrosDecisionTrees)
-melhoresResultados["DecisionTrees"] = [predicted, predp, score, matrix, best_parameters]
+    print("\n==== Executando --> Arvore de Decisao ====")
+    predicted, predp, score, matrix, best_parameters = decisionTrees(parametrosDecisionTrees)
+    melhoresResultados["DecisionTrees"] = [predicted, predp, score, matrix, best_parameters]
 
-print("\n==== Executando --> SVM ====")
-predicted, predp, score, matrix, best_parameters = sVM(parametersSVM)
-melhoresResultados["SVM"] = [predicted, predp, score, matrix, best_parameters]
+    print("\n==== Executando --> SVM ====")
+    predicted, predp, score, matrix, best_parameters = sVM(parametersSVM) 
+    melhoresResultados["SVM"] = [predicted, predp, score, matrix, best_parameters]
 
-print("\n==== Executando --> Naive Bayes ====")
-predicted, predp, score, matrix, best_parameters = naiveBayes(parametrosNaiveBayes)
-melhoresResultados["NaiveBayes"] = [predicted, predp, score, matrix, best_parameters]
+    print("\n==== Executando --> Naive Bayes ====")
+    predicted, predp, score, matrix, best_parameters = naiveBayes(parametrosNaiveBayes)
+    melhoresResultados["NaiveBayes"] = [predicted, predp, score, matrix, best_parameters]
 
-print("\n==== Executando --> Random Forest ====")
-predicted, predp, score, matrix, best_parameters = randomForest(
-    parametersRandomForest)
-melhoresResultados["RandomForest"] = [
-    predicted, predp, score, matrix, best_parameters]
+    print("\n==== Executando --> Random Forest ====")
+    predicted, predp, score, matrix, best_parameters = randomForest(
+        parametersRandomForest)
+    melhoresResultados["RandomForest"] = [
+        predicted, predp, score, matrix, best_parameters]
 
-print("\n==== Executando --> Bagging ====")
-predicted, predp, score, matrix, best_parameters = bagging(parametersBaggind)
-melhoresResultados["Bagging"] = [
-    predicted, predp, score, matrix, best_parameters]
+    print("\n==== Executando --> Bagging ====")
+    predicted, predp, score, matrix, best_parameters = bagging(
+        parametersBaggind)
+    melhoresResultados["Bagging"] = [
+        predicted, predp, score, matrix, best_parameters]
 
-for key in melhoresResultados:
-    print("Classification accuracy {}: {}".format(
-        key, melhoresResultados[key][2]))
+    for key in melhoresResultados:
+        print("Classification accuracy {}: {}".format(
+            key, melhoresResultados[key][2]))
 
 # ===================================================================================
 
-# Plot mistakes (images)
+def plot_mistakes(predicted, predp):
 
-# print(predicted.shape)
-# for i in range(len(predicted)):
-#     if (predicted[i] != y_test[i]):
-#         dist = 1
-#         j = 0
-#         while (j < len(X) and dist != 0):
-#            dist = np.linalg.norm(X[j]-X_test[i])
-#            j += 1
-#        print("Label:", y[j-1], class_names[y[j-1]], "  /  Prediction: ",
-#              predicted[i], class_names[predicted[i]], predp[i][predicted[i]])
-#         name = path + \
-#            str(class_names[y[j-1]]) + "/" + str(j) + ".jpg"
-#         print(name)
-#         im = cv2.imread(name)
-#         cv2.imshow("TDE2", im)
-#        print("=============================================================================")
+    # Plot mistakes (images)
+    print(predicted.shape)
+    for i in range(len(predicted)):
+        if (predicted[i] != y_test[i]):
+            dist = 1
+            j = 0
+            while (j < len(X) and dist != 0):
+                dist = np.linalg.norm(X[j]-X_test[i])
+            j += 1
+        print("Label:", y[j-1], class_names[y[j-1]], "  /  Prediction: ",
+              predicted[i], class_names[predicted[i]], predp[i][predicted[i]])
+        name = path + \
+            str(class_names[y[j-1]]) + "/" + str(j) + ".jpg"
+            
+        print(name)
+        im = cv2.imread(name)
+        cv2.imshow("TDE2", im)
+        
+        print(
+            "=============================================================================")
+
+
+melhoresResultados = {}
+while True:
+    op = int(input("\n==== Menu ===="
+                   "\n1 - Processamento das Imagens"
+                   "\n2 - Algoritmos de Machine Learning"
+                   "\nInforme a opção desejada: "))
+
+    if op == 1:
+        processing_Images()
+    elif op == 2:
+        processing_algorithms()
+    else:
+        print("\nVoce escolheu uma opção incorreta!!")
