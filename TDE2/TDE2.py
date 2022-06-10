@@ -1,8 +1,6 @@
 # Feature Extraction (Handcrafted and Deep Features)
 
 import cv2
-import re
-import math
 from matplotlib.pyplot import cla
 from skimage import feature
 from skimage.feature import hog
@@ -107,7 +105,7 @@ parametersSVM = [
 ]
 
 parametersRandomForest = [
-    {'n_estimators': list(range(10, 190, 20)),
+    {'n_estimators': list(range(80, 190, 20)),
      'max_depth': list(range(3, 30, 3)),
      'min_samples_split': list(range(5, 25, 5)),
      'criterion': ['gini', 'entropy']
@@ -116,7 +114,7 @@ parametersRandomForest = [
 
 
 parametersBaggind = [
-    {'n_estimators': list(range(10, 190, 20)),
+    {'n_estimators': list(range(80, 190, 20)),
      'bootstrap': [True, False],
      'bootstrap_features': [True, False],
      'base_estimator': [None, DecisionTreeClassifier(criterion='entropy', max_depth=5), DecisionTreeClassifier(criterion='entropy', max_depth=7), KNeighborsClassifier(n_neighbors=3), KNeighborsClassifier(n_neighbors=3, weights='distance')]
@@ -124,14 +122,16 @@ parametersBaggind = [
 ]
 
 
-# Feature extraction
-
 def processing_Images():
+    X_deep = []
+    y = []
+
+    # Feature extraction
     for classes_files, classe in zip(file_list, range(10)):
         for i in range(100):
             name = str(path) + str(class_names[classe]
                                    ) + str('/') + str(classes_files[i])
-            print(name)
+            print("\n", name)
             y.append(classe)
 
     # Extract deep features using InceptionV3 pretrained model
@@ -159,8 +159,8 @@ def processing_Images():
     df_class = pd.DataFrame(y)
     df_class.to_csv('y.csv', header=False, index=False)
 
-# ===================================================================================
 
+# ===================================================================================
 
 # Labels
 y = pd.read_csv('y.csv', header=None)
@@ -183,9 +183,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 
 def plotResultados(score, matrix):
-
-    # apresenta os resultados
-    print("Accuracy = %.2f " % score)
     print("Confusion Matrix:")
     print(matrix)
 
@@ -352,12 +349,15 @@ def processing_algorithms():
     melhoresResultados["KNN"] = [predicted, predp, score, matrix, best_parameters]
 
     print("\n==== Executando --> Arvore de Decisao ====")
-    predicted, predp, score, matrix, best_parameters = decisionTrees(parametrosDecisionTrees)
-    melhoresResultados["DecisionTrees"] = [predicted, predp, score, matrix, best_parameters]
+    predicted, predp, score, matrix, best_parameters = decisionTrees(
+        parametrosDecisionTrees)
+    melhoresResultados["DecisionTrees"] = [
+        predicted, predp, score, matrix, best_parameters]
 
     print("\n==== Executando --> SVM ====")
-    predicted, predp, score, matrix, best_parameters = sVM(parametersSVM) 
-    melhoresResultados["SVM"] = [predicted, predp, score, matrix, best_parameters]
+    predicted, predp, score, matrix, best_parameters = sVM(parametersSVM)
+    melhoresResultados["SVM"] = [predicted,
+                                 predp, score, matrix, best_parameters]
 
     print("\n==== Executando --> Naive Bayes ====")
     predicted, predp, score, matrix, best_parameters = naiveBayes(parametrosNaiveBayes)
@@ -375,34 +375,28 @@ def processing_algorithms():
     melhoresResultados["Bagging"] = [
         predicted, predp, score, matrix, best_parameters]
 
+    print("================================")
+    print("\nResultados encontrados: \n")
+    melhorAcuracia = ["", 0]
     for key in melhoresResultados:
         print("Classification accuracy {}: {}".format(
             key, melhoresResultados[key][2]))
+        if melhorAcuracia[1] < melhoresResultados[key][2]:
+            melhorAcuracia[0] = key
+            melhorAcuracia[1] = melhoresResultados[key][2]
+            
+    print("================================")
+    print("\nMelhor resultado foi do: {} \nAcuracia de: {}".format(
+        melhorAcuracia[0], melhorAcuracia[1]))
+    for key in melhoresResultados:
+        if key == melhorAcuracia[0]:
+            predicted, predp, score, matrix, best_parameters = melhoresResultados[key][0], melhoresResultados[key][1], melhoresResultados[key][2], melhoresResultados[key][3], melhoresResultados[key][4]
+
+    print("\nParametros utilizados: {}".format(best_parameters))
+    plotResultados(score, matrix)
+    return predicted, predp
 
 # ===================================================================================
-
-def plot_mistakes(predicted, predp):
-
-    # Plot mistakes (images)
-    print(predicted.shape)
-    for i in range(len(predicted)):
-        if (predicted[i] != y_test[i]):
-            dist = 1
-            j = 0
-            while (j < len(X) and dist != 0):
-                dist = np.linalg.norm(X[j]-X_test[i])
-            j += 1
-        print("Label:", y[j-1], class_names[y[j-1]], "  /  Prediction: ",
-              predicted[i], class_names[predicted[i]], predp[i][predicted[i]])
-        name = path + \
-            str(class_names[y[j-1]]) + "/" + str(j) + ".jpg"
-            
-        print(name)
-        im = cv2.imread(name)
-        cv2.imshow("TDE2", im)
-        
-        print(
-            "=============================================================================")
 
 
 melhoresResultados = {}
@@ -414,7 +408,32 @@ while True:
 
     if op == 1:
         processing_Images()
+
     elif op == 2:
-        processing_algorithms()
+        if len(X_deep) == 0 or len(y) == 0:
+            print("\nVoce precisa primeiro processar os dados!!")
+        else:
+            predicted, predp = processing_algorithms()
+            
+            # Plot mistakes (images)
+            print("\nPlot istakes (images)"
+                  f"\n{predicted.shape}")
+
+            for i in range(len(predicted)):
+                if (predicted[i] != y_test[i]):
+                    dist = 1
+                    j = 0
+                    while (j < len(X) and dist != 0):
+                        dist = np.linalg.norm(X[j]-X_test[i])
+                        j += 1
+                    print("Label:", y[j-1], class_names[y[j-1]], "  /  Prediction: ",
+                        predicted[i], class_names[predicted[i]], predp[i][predicted[i]])
+                    name = path + \
+                        str(class_names[y[j-1]]) + "/" + str(j) + ".jpg"
+                    print(name)
+                    im = cv2.imread(name)
+                    cv2.imshow("TDE2", im)
+                    print(
+                        "=============================================================================")
     else:
         print("\nVoce escolheu uma opção incorreta!!")
