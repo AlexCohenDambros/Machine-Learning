@@ -105,7 +105,7 @@ parametersSVM = [
 ]
 
 parametersRandomForest = [
-    {'n_estimators': list(range(80, 190, 20)),
+    {'n_estimators': list(range(80, 200, 20)),
      'max_depth': list(range(3, 30, 3)),
      'min_samples_split': list(range(5, 25, 5)),
      'criterion': ['gini', 'entropy']
@@ -114,13 +114,10 @@ parametersRandomForest = [
 
 
 parametersBaggind = [
-    {'n_estimators': list(range(80, 190, 20)),
-     'bootstrap': [True, False],
-     'bootstrap_features': [True, False],
-     'base_estimator': [None, DecisionTreeClassifier(criterion='entropy', max_depth=5), DecisionTreeClassifier(criterion='entropy', max_depth=7), KNeighborsClassifier(n_neighbors=3), KNeighborsClassifier(n_neighbors=3, weights='distance')]
+    {'n_estimators': list(range(80, 200, 40)),
+     'base_estimator': [None, DecisionTreeClassifier(criterion='entropy', max_depth=5), KNeighborsClassifier(n_neighbors=3), KNeighborsClassifier(n_neighbors=3, weights='distance')]
      }
 ]
-
 
 def processing_Images():
     X_deep = []
@@ -192,7 +189,7 @@ def kNN(parameters):
     # Treina o classificador
     clfa = KNeighborsClassifier()
 
-    clfa = GridSearchCV(clfa, parameters, scoring='r2', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
 
     clfa = clfa.fit(X_train, y_train)
 
@@ -218,7 +215,7 @@ def decisionTrees(parameters):
     # Treina o classificador
     clfa = DecisionTreeClassifier(random_state=42)
 
-    clfa = GridSearchCV(clfa, parameters, scoring='r2', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
 
     clfa = clfa.fit(X_train, y_train)
 
@@ -270,7 +267,7 @@ def naiveBayes(parameters):
     # Treina o classificador
     clfa = GaussianNB()
 
-    clfa = GridSearchCV(clfa, parameters, scoring='r2', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
 
     clfa = clfa.fit(X_train, y_train)
 
@@ -296,7 +293,7 @@ def randomForest(parameters):
     # Treina o classificador
     clfa = RandomForestClassifier(random_state=42)
 
-    clfa = GridSearchCV(clfa, parameters, scoring='r2', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
 
     clfa = clfa.fit(X_train, y_train)
 
@@ -322,7 +319,7 @@ def bagging(parameters):
     # Treina o classificador
     clfa = BaggingClassifier(random_state=42)
 
-    clfa = GridSearchCV(clfa, parameters, scoring='r2', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
 
     clfa = clfa.fit(X_train, y_train)
 
@@ -401,39 +398,43 @@ def processing_algorithms():
 
 melhoresResultados = {}
 while True:
-    op = int(input("\n==== Menu ===="
-                   "\n1 - Processamento das Imagens"
-                   "\n2 - Algoritmos de Machine Learning"
-                   "\nInforme a opção desejada: "))
+    
+    try: 
+        op = int(input("\n==== Menu ===="
+                    "\n1 - Processamento das Imagens"
+                    "\n2 - Algoritmos de Machine Learning"
+                    "\nInforme a opção desejada: "))
+        
+        if op == 1:
+            processing_Images()
 
-    if op == 1:
-        processing_Images()
+        elif op == 2:
+            if len(X_deep) == 0 or len(y) == 0:
+                print("\nVoce precisa primeiro processar os dados!!")
+            else:
+                predicted, predp = processing_algorithms()
+                
+                # Plot mistakes (images)
+                print("\nPlot istakes (images)"
+                    f"\n{predicted.shape}")
 
-    elif op == 2:
-        if len(X_deep) == 0 or len(y) == 0:
-            print("\nVoce precisa primeiro processar os dados!!")
+                for i in range(len(predicted)):
+                    if (predicted[i] != y_test[i]):
+                        dist = 1
+                        j = 0
+                        while (j < len(X) and dist != 0):
+                            dist = np.linalg.norm(X[j]-X_test[i])
+                            j += 1
+                        print("Label:", y[j-1], class_names[y[j-1]], "  /  Prediction: ",
+                            predicted[i], class_names[predicted[i]], predp[i][predicted[i]])
+                        name = path + \
+                            str(class_names[y[j-1]]) + "/" + str(j) + ".jpg"
+                        print(name)
+                        im = cv2.imread(name)
+                        cv2.imshow("TDE2", im)
+                        print(
+                            "=============================================================================")
         else:
-            predicted, predp = processing_algorithms()
-            
-            # Plot mistakes (images)
-            print("\nPlot istakes (images)"
-                  f"\n{predicted.shape}")
-
-            for i in range(len(predicted)):
-                if (predicted[i] != y_test[i]):
-                    dist = 1
-                    j = 0
-                    while (j < len(X) and dist != 0):
-                        dist = np.linalg.norm(X[j]-X_test[i])
-                        j += 1
-                    print("Label:", y[j-1], class_names[y[j-1]], "  /  Prediction: ",
-                        predicted[i], class_names[predicted[i]], predp[i][predicted[i]])
-                    name = path + \
-                        str(class_names[y[j-1]]) + "/" + str(j) + ".jpg"
-                    print(name)
-                    im = cv2.imread(name)
-                    cv2.imshow("TDE2", im)
-                    print(
-                        "=============================================================================")
-    else:
+            print("\nVoce escolheu uma opção incorreta!!")
+    except:
         print("\nVoce escolheu uma opção incorreta!!")
