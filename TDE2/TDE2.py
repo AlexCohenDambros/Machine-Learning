@@ -77,15 +77,15 @@ else:
 # ======== Parametros das funcoes de Machine Learning ========
 
 parametrosKNN = [
-    {'n_neighbors': list(range(1, 10, 1)),
+    {'n_neighbors': range(1, 10, 1),
      'weights': ['uniform', 'distance'],
      'algorithm':['auto', 'ball_tree', 'kd_tree', 'brute'],
      'p': [1, 2],
-     'leaf_size': list(range(2, 20, 2))},
+     'leaf_size': range(2, 20, 2)},
 ]
 
 parametrosDecisionTrees = [
-    {'max_depth': list(range(3, 60, 3)),
+    {'max_depth': range(3, 60, 3),
      'min_samples_split': list(range(5, 25, 5)),
      'criterion': ['entropy', 'gini'],
      'splitter':['best', 'random']},
@@ -105,8 +105,8 @@ parametersSVM = [
 ]
 
 parametersRandomForest = [
-    {'n_estimators': list(range(80, 200, 20)),
-     'max_depth': list(range(3, 30, 3)),
+    {'n_estimators': range(80, 200, 20),
+     'max_depth': range(3, 30, 3),
      'min_samples_split': list(range(5, 25, 5)),
      'criterion': ['gini', 'entropy']
      }
@@ -114,7 +114,7 @@ parametersRandomForest = [
 
 
 parametersBaggind = [
-    {'n_estimators': list(range(80, 200, 40)),
+    {'n_estimators': range(80, 200, 40),
      'base_estimator': [None, DecisionTreeClassifier(criterion='entropy', max_depth=5), KNeighborsClassifier(n_neighbors=3), KNeighborsClassifier(n_neighbors=3, weights='distance')]
      }
 ]
@@ -179,7 +179,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=.4, random_state=42, stratify=y)
 
 
-def plotResultados(score, matrix):
+def plotResultados(matrix):
     print("Confusion Matrix:")
     print(matrix)
 
@@ -390,7 +390,7 @@ def processing_algorithms():
             predicted, predp, score, matrix, best_parameters = melhoresResultados[key][0], melhoresResultados[key][1], melhoresResultados[key][2], melhoresResultados[key][3], melhoresResultados[key][4]
 
     print("\nParametros utilizados: {}".format(best_parameters))
-    plotResultados(score, matrix)
+    plotResultados(matrix)
     return predicted, predp
 
 # ===================================================================================
