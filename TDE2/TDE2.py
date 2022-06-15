@@ -176,7 +176,7 @@ print(X.shape)
 # EXEMPLO USANDO HOLDOUT
 # Holdout -> dividindo a base em treinamento (60%) e teste (40%), estratificada
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=.4, random_state=42, stratify=y)
+    X, y, test_size=.3, random_state=42, stratify=y)
 
 
 def plotResultados(matrix):
@@ -189,7 +189,7 @@ def kNN(parameters):
     # Treina o classificador
     clfa = KNeighborsClassifier()
 
-    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=-1)
 
     clfa = clfa.fit(X_train, y_train)
 
@@ -215,7 +215,7 @@ def decisionTrees(parameters):
     # Treina o classificador
     clfa = DecisionTreeClassifier(random_state=42)
 
-    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=-1)
 
     clfa = clfa.fit(X_train, y_train)
 
@@ -241,7 +241,7 @@ def sVM(parameters):
     # Treina o classificador
     clfa = SVC(probability=True)
 
-    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=-1)
 
     clfa = clfa.fit(X_train, y_train)
 
@@ -267,7 +267,7 @@ def naiveBayes(parameters):
     # Treina o classificador
     clfa = GaussianNB()
 
-    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=-1)
 
     clfa = clfa.fit(X_train, y_train)
 
@@ -293,7 +293,7 @@ def randomForest(parameters):
     # Treina o classificador
     clfa = RandomForestClassifier(random_state=42)
 
-    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=-1)
 
     clfa = clfa.fit(X_train, y_train)
 
@@ -319,7 +319,7 @@ def bagging(parameters):
     # Treina o classificador
     clfa = BaggingClassifier(random_state=42)
 
-    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=5)
+    clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=-1)
 
     clfa = clfa.fit(X_train, y_train)
 
