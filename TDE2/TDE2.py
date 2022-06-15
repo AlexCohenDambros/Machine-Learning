@@ -86,7 +86,7 @@ parametrosKNN = [
 
 parametrosDecisionTrees = [
     {'max_depth': range(3, 60, 3),
-     'min_samples_split': list(range(5, 25, 5)),
+     'min_samples_split': range(5, 25, 5),
      'criterion': ['entropy', 'gini'],
      'splitter':['best', 'random']},
 ]
@@ -107,13 +107,13 @@ parametersSVM = [
 parametersRandomForest = [
     {'n_estimators': range(80, 200, 20),
      'max_depth': range(3, 30, 3),
-     'min_samples_split': list(range(5, 25, 5)),
+     'min_samples_split': range(5, 25, 5),
      'criterion': ['gini', 'entropy']
      }
 ]
 
 
-parametersBaggind = [
+parametersBagging = [
     {'n_estimators': range(80, 200, 40),
      'base_estimator': [None, DecisionTreeClassifier(criterion='entropy', max_depth=5), KNeighborsClassifier(n_neighbors=3), KNeighborsClassifier(n_neighbors=3, weights='distance')]
      }
@@ -174,7 +174,7 @@ print(X.shape)
 # ===================================================================================
 
 # EXEMPLO USANDO HOLDOUT
-# Holdout -> dividindo a base em treinamento (60%) e teste (40%), estratificada
+# Holdout -> dividindo a base em treinamento (70%) e teste (30%), estratificada
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=.3, random_state=42, stratify=y)
 
@@ -239,7 +239,7 @@ def decisionTrees(parameters):
 def sVM(parameters):
 
     # Treina o classificador
-    clfa = SVC(probability=True)
+    clfa = SVC(probability=True, random_state=42)
 
     clfa = GridSearchCV(clfa, parameters, scoring='accuracy', n_jobs=-1)
 
@@ -368,7 +368,7 @@ def processing_algorithms():
 
     print("\n==== Executando --> Bagging ====")
     predicted, predp, score, matrix, best_parameters = bagging(
-        parametersBaggind)
+        parametersBagging)
     melhoresResultados["Bagging"] = [
         predicted, predp, score, matrix, best_parameters]
 
