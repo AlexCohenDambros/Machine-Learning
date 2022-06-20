@@ -33,10 +33,6 @@ print("Shape de y: ", y.shape)
 
 
 # Normalizando os dados
-#scaler = preprocessing.StandardScaler().fit(X)
-#X = scaler.transform(X)
-
-# segunda forma de normalização
 scaler = preprocessing.MinMaxScaler().fit(X)
 X = scaler.transform(X)
 

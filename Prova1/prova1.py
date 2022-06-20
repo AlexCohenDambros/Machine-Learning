@@ -39,10 +39,6 @@ print("Shape de y: ", y.shape)
 
 
 # Normalizando os dados
-#scaler = preprocessing.StandardScaler().fit(X)
-#X = scaler.transform(X)
-
-# segunda forma de normalização
 scaler = preprocessing.MinMaxScaler().fit(X)
 X = scaler.transform(X)
 
@@ -76,12 +72,8 @@ def knn(T, parameters_here):
 
     gs = GridSearchCV(model, parameters_here, scoring = 'accuracy', cv=T, n_jobs=5)
 
-    ## ->
     gs.fit(X_val, y_val)
-    ## ->
 
-    df = gs.cv_results_
-    #print(tabulate(df,headers='keys', tablefmt='psql'))
     print(gs.best_params_)
 
     # Definindo a técnica a ser utilizada
@@ -128,12 +120,8 @@ def arvoreDecisao(T, parameters_here):
 
     gs = GridSearchCV(model, parameters_here, scoring = 'accuracy', cv=T, n_jobs=5)
 
-    ## ->
     gs.fit(X_val, y_val)
-    ## ->
 
-    df = gs.cv_results_
-    #print(tabulate(df,headers='keys', tablefmt='psql'))
     print(gs.best_params_)
 
     # Definindo a técnica a ser utilizada
@@ -180,12 +168,8 @@ def naivebayes(T, parameters_here):
 
     gs = GridSearchCV(model, parameters_here, scoring = 'accuracy', cv=T, n_jobs=5)
 
-    ## ->
     gs.fit(X_val, y_val)
-    ## ->
-
-    df = gs.cv_results_
-    #print(tabulate(df,headers='keys', tablefmt='psql'))
+    
     print(gs.best_params_)
 
     # Definindo a técnica a ser utilizada
